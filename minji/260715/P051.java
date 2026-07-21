@@ -3,74 +3,59 @@ import java.util.*;
 
 public class Main {
     static ArrayList<Integer>[] list;
-    static int[] visited;
-    static boolean check;
+    static boolean[] visited;
+    static int[] check;
+    static boolean isBi = true;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringBuilder sb = new StringBuilder();
+        StringTokenizer st;
 
-        int K = Integer.parseInt(br.readLine());
-
-        for(int t=0; t<K; t++) {
-            StringTokenizer st = new StringTokenizer(br.readLine());
-
-            int V = Integer.parseInt(st.nextToken());
-            int E = Integer.parseInt(st.nextToken());
+        int T = Integer.parseInt(br.readLine());
+        for(int t=0; t<T; t++) {
+            st = new StringTokenizer(br.readLine());
+            int V = Integer.parseInt(st.nextToken()); // 노드
+            int E = Integer.parseInt(st.nextToken()); // 엣지
 
             list = new ArrayList[V+1];
-            visited = new int[V+1];
-            check = true;
-
-            for(int i=0; i<=V; i++) {
+            for(int i=1; i<=V; i++) {
                 list[i] = new ArrayList<>();
             }
 
             for(int i=0; i<E; i++) {
                 st = new StringTokenizer(br.readLine());
-
-                int s = Integer.parseInt(st.nextToken());
-                int e = Integer.parseInt(st.nextToken());
-
-                list[s].add(e);
-                list[e].add(s);
+                int a = Integer.parseInt(st.nextToken());
+                int b = Integer.parseInt(st.nextToken());
+                list[a].add(b);
+                list[b].add(a);
             }
 
-            for(int i=1; i<=V; i++) {
-                if(visited[i] == 0) {
-                    visited[i] = 1;
-                    dfs(i);
-                }
+            visited = new boolean[V+1];
+            check = new int[V+1];
 
-                if(!check) {
+            for(int i=1; i<=V; i++) {
+                if(isBi) {
+                    DFS(i);
+                }
+                else {
                     break;
                 }
             }
 
-            if(check) {
-                sb.append("YES").append("\n");
-            }
-            else {
-                sb.append("NO").append("\n");
-            }
+            if(isBi) System.out.println("YES");
+            else System.out.println("NO");
         }
-
-        System.out.print(sb);
     }
 
-    public static void dfs(int now) {
+    public static void DFS(int now) {
+        visited[now] = true;
         for(int next : list[now]) {
-            if(visited[next] == 0) {
-                visited[next] = -visited[now];
-                dfs(next);
+            if(!visited[next]) {
+                check[next] = (check[now] + 1) % 2;
+                DFS(next);
             }
-            else if(visited[next] == visited[now]) {
-                check = false;
-                return;
-            }
-
-            if(!check) {
-                return;
+            else if(check[next] == check[now]) {
+                isBi = false;
             }
         }
     }

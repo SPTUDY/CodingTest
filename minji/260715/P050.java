@@ -2,34 +2,35 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
+    static int N, M;
     static ArrayList<Integer>[] list;
-    static boolean visited[];
+    static boolean[] visited;
     static int[] answer;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
         StringTokenizer st = new StringTokenizer(br.readLine());
 
-        int N = Integer.parseInt(st.nextToken());
-        int M = Integer.parseInt(st.nextToken());
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
 
-        answer = new int[N+1];
+
         list = new ArrayList[N+1];
-        for(int i=0; i<=N; i++) {
+        for(int i=1; i<=N; i++) {
             list[i] = new ArrayList<>();
         }
 
         for(int i=0; i<M; i++) {
             st = new StringTokenizer(br.readLine());
-            int s = Integer.parseInt(st.nextToken());
-            int e = Integer.parseInt(st.nextToken());
-            list[s].add(e);
+            int a = Integer.parseInt(st.nextToken());
+            int b = Integer.parseInt(st.nextToken());
+            list[a].add(b);
         }
 
+        answer = new int[N+1];
         for(int i=1; i<=N; i++) {
             visited = new boolean[N+1];
-            bfs(i);
+            BFS(i);
         }
 
         int max = 0;
@@ -44,18 +45,18 @@ public class Main {
         }
     }
 
-    public static void bfs(int start) {
+    public static void BFS(int start) {
         Queue<Integer> q = new LinkedList<>();
         q.add(start);
         visited[start] = true;
 
         while(!q.isEmpty()) {
             int now = q.poll();
-            for(int i : list[now]) {
-                if(!visited[i]) {
-                    visited[i] = true;
-                    answer[i]++;
-                    q.add(i);
+            for(int next : list[now]) {
+                if(!visited[next]) {
+                    visited[next] = true;
+                    answer[next]++;
+                    q.add(next);
                 }
             }
         }

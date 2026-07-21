@@ -2,71 +2,64 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-    static int[] capacity = new int[3];
-    static boolean[][] visited;
-    static boolean[] answer;
+    static int[] capacity = new int[3]; // 각각 A, B, C의 최대 용량
+    static boolean[][] visited; // visited[a][b] = true
+                                // → A에 a리터, B에 b리터가 들어 있는 상태를 이미 확인했다는 뜻
+    static boolean[] answer; // answer[c] = true → C에 c리터가 들어 있는 경우가 가능함
 
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine());
+    // 물을 옮기는 6가지 경우의 수
+    static int[] sender = {0, 0, 1, 1, 2, 2};
+    static int[] receiver = {1, 2, 1, 2, 0, 1};
 
-        for(int i=0; i<3; i++) {
-            capacity[i] = Integer.parseInt(st.nextToken());
-        }
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        capacity[0] = sc.nextInt();
+        capacity[1] = sc.nextInt();
+        capacity[2] = sc.nextInt();
 
-        visited = new boolean[capacity[0]+1][capacity[1]+1];
-        answer = new boolean[capacity[2]+1];
+        visited = new boolean[201][201];
+        answer = new boolean[201];
 
-        bfs();
+        BFS();
 
-        StringBuilder sb = new StringBuilder();
-
-        for(int i=0; i<=capacity[2]; i++) {
+        for(int i=0; i<answer.length; i++) {
             if(answer[i]) {
-                sb.append(i).append(" ");
+                System.out.print(i + " ");
             }
         }
-
-        System.out.println(sb);
     }
 
-    public static void bfs() {
+    public static void BFS() {
         Queue<State> q = new LinkedList<>();
-
-        q.add(new State(0, 0, capacity[2]));
+        q.add(new State(0, 0));
         visited[0][0] = true;
         answer[capacity[2]] = true;
 
         while(!q.isEmpty()) {
             State now = q.poll();
+            int a = now.a;
+            int b = now.b;
+            int c = capacity[2] - a - b;
 
-            int[] water = {now.a, now.b, now.c};
+            for(int k=0; k<6; k++) {
+                int[] next = {a, b, c};
+                next[receiver[k]] += next[sender[k]];
+                next[sender[k]] = 0;
 
-            for(int i=0; i<3; i++) {
-                for(int j=0; j<3; j++) {
-                    if(i == j) {
-                        continue;
-                    }
+                // 물이 넘칠 때
+                if(next[receiver[k]] > capacity[receiver[k]]) {
+                    // 초과하는 만큼 다시 이전 물통에 넣기
+                    next[sender[k]] = next[receiver[k]] - capacity[receiver[k]];
+                    next[receiver[k]] = capacity[receiver[k]];
+                }
 
-                    int[] next = water.clone();
+                if(!visited[next[0]][next[1]]) {
+                    visited[next[0]][next[1]] = true;
+                    q.add(new State(next[0], next[1]));
 
-                    int space = capacity[j] - next[j];
-                    int move = Math.min(next[i], space);
-
-                    next[i] -= move;
-                    next[j] += move;
-
-                    int a = next[0];
-                    int b = next[1];
-                    int c = next[2];
-
-                    if(!visited[a][b]) {
-                        visited[a][b] = true;
-                        q.add(new State(a, b, c));
-
-                        if(a == 0) {
-                            answer[c] = true;
-                        }
+                    // A의 양이 0이면, C의 무게를 정답 배열에 저장
+                    if(next[0] == 0) {
+                        answer[next[2]] = true;
                     }
                 }
             }
@@ -76,12 +69,9 @@ public class Main {
     static class State {
         int a;
         int b;
-        int c;
-
-        State(int a, int b, int c) {
+        public State(int a, int b) {
             this.a = a;
             this.b = b;
-            this.c = c;
         }
     }
 }
